@@ -50,7 +50,7 @@ const Hero = () => {
             borderStyle: "solid",
           }}
           imgStyle={{ borderRadius: "50%" }}
-          alt="Catalyst Helium"
+          alt="Wamaitha Nyamu"
         />
         <div
           sx={{
@@ -72,8 +72,8 @@ const Hero = () => {
               color: baseColors.gray[8],
             }}
           >
-            Hello there! My name is <b>Charlie Rose</b> and I am an excellent
-            human being and <b>bold</b> writer.
+            Hello there! My name is <b>Wamaitha</b> and I am part of the human race. <b>Introversion</b> is my tribe. Survival is my skill. <b>Reading</b> is my escape. <b>Coding</b> is my art.
+
           </Themed.p>
           <Button
             as={Link}
@@ -93,7 +93,7 @@ const Hero = () => {
               },
             }}
           >
-            Hire Me
+            Talk to me
           </Button>
         </div>
       </div>
