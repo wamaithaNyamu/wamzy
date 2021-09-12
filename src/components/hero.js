@@ -10,7 +10,7 @@ import { GatsbyImage } from "gatsby-plugin-image"
 const Hero = () => {
   const data = useStaticQuery(graphql`
     {
-      avatar: file(relativePath: { eq: "avatar.jpg" }) {
+      avatar: file(relativePath: { eq: "avatar.png" }) {
         childImageSharp {
           gatsbyImageData(width: 500, layout: CONSTRAINED, placeholder: BLURRED)
         }
@@ -66,13 +66,15 @@ const Hero = () => {
         >
           <Themed.p
             sx={{
-              fontSize: [4, 5, 6, null, null],
+              fontSize: [2, 3, 4, null, null],
               lineHeight: "snug",
               my: 4,
               color: baseColors.gray[8],
             }}
           >
-            Hello there! My name is <b>Wamaitha</b> and I am part of the human race. <b>Introversion</b> is my tribe. Survival is my skill. <b>Reading</b> is my escape. <b>Coding</b> is my art.
+            Hello there!👋🏾👋🏾 My name is <b>Wamaitha</b>. I know this is supposed to be an 'about me' section but how do I choose what to say and what not to say?🤔🤔
+            As Linus says <em>Talk is cheap show me the code </em>. That's the best I can do for now. I'm pretty sure you are not interested in knowing my favorite color😅.
+            Oh you are? It's black. Definitely has to be black 😁😁. Also you need to read <i>The richest man in Babylon by George Clason</i> if you have'nt. This book changed my life! How you ask ? Oh I'm talking too much? Coool coool... One last thing😼, feel free to contact me on any typo's or clarifications😊😊. Happy hacking!!👩🏾‍💻👩🏾‍💻
 
           </Themed.p>
           <Button
@@ -93,7 +95,7 @@ const Hero = () => {
               },
             }}
           >
-            Talk to me
+            Talk to me 💬💬
           </Button>
         </div>
       </div>
