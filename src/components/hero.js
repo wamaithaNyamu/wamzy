@@ -66,7 +66,7 @@ const Hero = () => {
         >
           <Themed.p
             sx={{
-              fontSize: [2, 3, 4, null, null],
+              fontSize: [1, 2, 3, null, null],
               lineHeight: "snug",
               my: 4,
               color: baseColors.gray[8],
