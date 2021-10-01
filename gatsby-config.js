@@ -42,6 +42,15 @@ module.exports = {
       },
     ],
   },
+  // In your gatsby-config.js
+  // plugins: [
+  //   {
+  //     resolve: `gatsby-transformer-remark`,
+  //     options: {
+  //       plugins: [`gatsby-remark-responsive-iframe`],
+  //     },
+  //   },
+  // ]
   plugins: [
     {
       resolve: `gatsby-theme-catalyst-helium`,
@@ -55,6 +64,7 @@ module.exports = {
         excerptLength: 200,
         // Helium
         useHero: true,
+        plugins: [`gatsby-remark-responsive-iframe`],
       },
     },
     {
