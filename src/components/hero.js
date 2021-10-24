@@ -74,7 +74,7 @@ const Hero = () => {
           >
             Hello there!👋🏾👋🏾 My name is <b>Wamaitha</b>. I know this is supposed to be an 'about me' section but how do I choose what to say and what not to say?🤔🤔
             As Linus says <em>Talk is cheap show me the code </em>. That's the best I can do for now. I'm pretty sure you are not interested in knowing my favorite color😅.
-            Oh you are? It's black. Definitely has to be black 😁😁. Also you need to read <i>The richest man in Babylon by George Clason</i> if you have'nt. This book changed my life! How you ask ? Oh I'm talking too much? Coool coool... One last thing😼, feel free to contact me on any typo's or clarifications😊😊. Happy hacking!!👩🏾‍💻👩🏾‍💻.Okay one last thing.
+            Oh you are? It's black. Definitely has to be black 😁😁. Also you need to read <i>The richest man in Babylon by George Clason</i> if you haven't. This book changed my life! How you ask ? Oh I'm talking too much? Coool coool... One last thing😼, feel free to contact me on any typos or clarifications😊😊. Happy hacking!!👩🏾‍💻👩🏾‍💻.Okay one last thing.
             Its the last I promise, subscribe to my <a target='_blank' href="https://www.youtube.com/channel/UCTgufBSxzrj7VSLwEEnu7Jw?sub_confirmation=1">YouTube here</a>.😁😁
 
           </Themed.p>
