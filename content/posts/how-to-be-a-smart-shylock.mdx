@@ -178,6 +178,7 @@ From the above graphs we can see that we have a mix of categorical variables and
 
 <h2>Data CLeaning </h2>
 From our EDA we have established we have some problems we need to fix with the data :
+
 1. Deal with null values to ensure our data is of same length
 2. Deal with outliers
 3. Find a way of converting categorical variables to discrete variables since our model will expect to use discrete values.
@@ -249,25 +250,109 @@ Categorical_variables = np.array(list(filter(lambda x: x not in discrete_columns
 ```
 
 The above code stores all our categorical column names into a list.
-The Loan_ID column does not help with our predictions so we drop it. You will not qualify for a loan just because your loan id is a certain value.
+The Loan_ID column does not help with our predictions, so we drop it. You will not qualify for a loan just because your loan id is a certain value.
 
 ```py
 # Dropping the Loan_ID from the variables
 Categorical_variables = np.delete(Categorical_variables,0)
 ```
-
-We will also drop our predictor variable for now
-
-```py
-# Dropping the Loan_Status from the variables since it is our Y
-Categorical_variables = np.delete(Categorical_variables,-1)
-```
-Looks like we are done but a closer look at the Dependents, they are supposed to be an integer but have been represented as strings. For this we need to convert them to integers since they are discrete values not categorical variables.
+Next we convert all our categorical variables to discrete variables
 
 ```py
-#All values of "Dependents" columns were of "str" form now converting to "int" form.
-data["Dependents"] = data["Dependents"].replace('3+',int(3))
-data["Dependents"] = data["Dependents"].replace('1',int(1))
-data["Dependents"] = data["Dependents"].replace('2',int(2))
-data["Dependents"] = data["Dependents"].replace('0',int(0))
+def convert_categorical_to_discrete(col_name):
+  data[col_name]=le.fit_transform(data[col_name])
 ```
+We will loop through all categorical variable columns and transform the categorical variables to discrete. For example, on the married column, we have either a yes or no. Transforming this column converts all <mark>No</mark> entries to 0 and all <mark>Yes</mark> entries to 1.
+```py
+for col in Categorical_variables:
+    convert_categorical_to_discrete(col)
+```
+Our dataframe now looks as follows
+<img src="../assets/shylock/normdf.png" alt="Hot encoded df"/>
+
+<h2>Model Building </h2>
+
+We will use the following classification algorithms:
+
+1. Logistic regression
+2. SVM
+3. Decision trees
+
+Performance of the models will be measured using the recall, precision, f1score and accuracy perform for each model. A confusion matrix will be a great way to visualise the model performance.
+
+Algorithms initialisations:
+
+```py
+# algorithm init
+LOGC= LogisticRegression(solver='liblinear', random_state=0)
+SVM=SVC(kernel="linear")
+DTC=DecisionTreeClassifier()
+
+```
+For visualising the decision tree, the dtreeviz package will come in handy.
+
+Install it using :
+
+```shell
+pip install dtreeviz
+```
+Then import it using :
+```py
+
+from dtreeviz.trees import dtreeviz # remember to load the package
+
+```
+
+
+Next we build a class that runs all our algorithms. The class code looks as follows:
+
+```py
+class ClassificationAlgorithms():
+    def __init__(self, df,x,y):
+      self.originalData= df
+      self.data =  self.originalData.copy()
+      self.X = x
+      self.y = y
+      self.X_train = 0
+      self.X_test = 0
+      self.y_train = 0
+      self.y_test= 0
+
+
+    def split_data(self):
+       self.X = self.data.drop(["Loan_Status","Loan_ID"],axis=1)
+       self.y = self.data["Loan_Status"]
+       self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3, random_state=42)
+
+    def model_report(self,model,model_name):
+        print_line(model_name)
+        model.fit(self.X_train, self.y_train)
+        y_predict = model.predict(self.X_test)
+        print(classification_report(self.y_test, y_predict))
+        write_results_to_file(classification_report(self.y_test, y_predict))
+        sns.heatmap(confusion_matrix(self.y_test, y_predict), annot=True)
+        plt.show()
+
+
+
+    def logistic_regression(self):
+        model = LOGC
+        self.model_report(model,"LOGISTIC REGRESSION")
+
+    def svm(self):
+        model =SVM
+        self.model_report(model,"SVM")
+
+
+
+    def decision_trees(self):
+        model = DTC
+        self.model_report(model,"DECISION TREES")
+        fig = plt.figure(figsize=(25,20))
+        _ = tree.plot_tree(model,
+                            feature_names=self.data.drop(["Loan_Status","Loan_ID"],axis=1).columns.to_list(),
+                            class_names=['Y','N'],
+                            filled=True)
+
+```
+
