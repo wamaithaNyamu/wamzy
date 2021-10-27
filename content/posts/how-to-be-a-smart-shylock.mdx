@@ -150,8 +150,14 @@ def write_results_to_file(txt):
   f = open("results.txt","a")
   f.write(txt + '\n')
   f.close()
+
+def print_line(name):
+    write_results_to_file(f'------------------------------------------------------------{name}----------------------------------')
+    print(f'------------------------------------------------------------{name}----------------------------------')
+
 ```
-The above code just removes any old files named results.txt on our file system and creates one if it does not exist.
+The above code just removes any old files named results.txt on our file system and creates one if it does not exist. The write_results_to_file appends a new line to the results.txt while the
+print_line adds a divider to the write_results_to_file file.
 
 <h3>Checking the distribution of the data</h3>
 Ideally,to get the best possible results our data needs to be in a normal distribution. Data in a normal distribution observes the bell curve.
@@ -355,4 +361,111 @@ class ClassificationAlgorithms():
                             filled=True)
 
 ```
+Lets break down the class to understand what's going on.
+
+Our __init__ function initialises all the global variables to be used in the class
+
+```py
+# initialise all our variables used in the class
+  def __init__(self, df,x,y):
+      # the class has three arguments, df - the data, x and y which is our feature and predictor values respectfully
+      self.originalData= df
+      # store a copy of our dataframe in data
+      self.data =  self.originalData.copy()
+      self.X = x
+      self.y = y
+      self.X_train = 0
+      self.X_test = 0
+      self.y_train = 0
+      self.y_test= 0
+
+```
+The split_data first gets all the features we need for the models. We drop the Loan_Status column since its our target variable, and the Loan_ID column since it does not contribute to our predictions. Then we eventually split the data into training and test sets.
+
+```py
+
+  def split_data(self):
+      # Features
+       self.X = self.data.drop(["Loan_Status","Loan_ID"],axis=1)
+     # Target variable
+       self.y = self.data["Loan_Status"]
+    # Split to test and training set
+       self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3, random_state=42)
+```
+The model_report function takes in a model and a model name as its parameters. The model is then fit to the training set and then used to make predictions on the test set. The predictions are then used to draw a confusion matrix. The output of the confusion matrix is then printed to the console and written in results.txt
+
+```py
+
+    def model_report(self,model,model_name):
+        print_line(model_name)
+        # fit model to
+        model.fit(self.X_train, self.y_train)
+        y_predict = model.predict(self.X_test)
+        print(classification_report(self.y_test, y_predict))
+        write_results_to_file(classification_report(self.y_test, y_predict))
+        sns.heatmap(confusion_matrix(self.y_test, y_predict), annot=True)
+        plt.show()
+
+
+```
+
+Lastly we have the three models used for the classification task.
+
+```py
+  def logistic_regression(self):
+        model = LOGC
+        self.model_report(model,"LOGISTIC REGRESSION")
+
+    def svm(self):
+        model =SVM
+        self.model_report(model,"SVM")
+
+
+
+    def decision_trees(self):
+        model = DTC
+        self.model_report(model,"DECISION TREES")
+        fig = plt.figure(figsize=(25,20))
+        _ = tree.plot_tree(model,
+                            feature_names=self.data.drop(["Loan_Status","Loan_ID"],axis=1).columns.to_list(),
+                            class_names=['Y','N'],
+                            filled=True)
+
+```
+Now with the class explained lets build a function that utilises this class
+
+```py
+
+# test the algorithms
+
+def _ClassificationAlgorithms(df,x,y):
+  # initialise the class object
+   c = ClassificationAlgorithms(df,x,y)
+  # split the data
+   c.split_data()
+  # call the models
+   c.logistic_regression()
+   c.svm()
+   c.decision_trees()
+```
+
+```py
+# call the function and pass in our dataframe and initialise x and y to 0.
+_ClassificationAlgorithms(data,0,0)
+
+```
+
+What we get :
+
+1. For logistic regression
+<img src="../assets/shylock/confusionMatrix.png" alt="Confusion Matrix"/>
+
+
+2. For SVM
+<img src="../assets/shylock/confusionMatrix.png" alt="Confusion Matrix"/>
+
+
+3. For decision trees
+<img src="../assets/shylock/confusionMatrix.png" alt="Confusion Matrix"/>
+<img src="../assets/shylock/decision_tree.jpeg" alt="Confusion Matrix"/>
 
