@@ -467,5 +467,195 @@ What we get :
 
 3. For decision trees
 <img src="../assets/shylock/confusionMatrix.png" alt="Confusion Matrix"/>
-<img src="../assets/shylock/decision_tree.jpeg" alt="Confusion Matrix"/>
+<img src="../assets/shylock/decision_tree.jpeg" alt="Decision tree graph"/>
+
+All the confusion matrices show a common story of having very poor recall on the first class. This would suggest we might have an imbalanced dataset.
+
+
+<h2>Can we do better?</h2>
+<h4>Checking if our data is balanced</h4>
+
+For our model to correctly predict the outcome, we need to have the two classes balanced in the datasets.
+
+Lets visualise out data
+```py
+Approved = list(data.Loan_Status).count(1)
+Rejected = list(data.Loan_Status).count(0)
+print("Count of 1<Approved>: ",Approved,"\nCount of 0<Rejected>: ",Rejected)
+
+fig = px.bar((Approved,Rejected),x=["Yes","No"],y=[Approved,Rejected],color=[Approved,Rejected])
+fig.show()
+```
+<img src="../assets/shylock/dataCount.png" alt="Data balance"/>
+
+The difference between these two classes is too big. As such the model does not have enough samples of the rejected classes to build a balanced model.
+
+```py
+event_rate = Rejected/len(data) * 100
+event_rate
+```
+Our event rate means only 31.27035830618892% of the data is of the rejected class. Ideally we should get a 50-50 representation as some classification algorithm will tend to be biased toward the majority class. We shall use sampling techniques on the data. The main objective of balancing classes is to either increasing the frequency of the minority class (Rejected class) or decreasing the frequency of the majority class(Approved class).
+
+<h3>Sampling techniques for the classification problem</h3>
+
+Resampling the data helps curb the issue of data imbalance. Resampling options we have:
+
+1. Random undersampling - randomly deleting entries from the majority class. The approved class for this case.
+
+2. Random oversampling - randomly deleting entries from the minority class. The rejected class for our current dataset.
+
+We will be using the imblearn package for sampling techniques.
+
+To install it run :
+
+```py
+pip install imbalanced-learn
+```
+
+Import the relevant functions from imblearn with :
+
+```py
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
+from collections import Counter
+from imblearn.pipeline import Pipeline
+```
+
+<blockquote>Please note for this package to work you need to have installed scikit-learn version 0.23.2</blockquote>
+
+```py
+pip install -U scikit-learn==0.23.2
+```
+
+Our resampling class :
+
+```py
+
+
+class ResamplingTechniques():
+
+  def __init__(self,df):
+     self.data = df.copy()
+     self.X = 0
+     self.y = 0
+     self.X_train = 0
+     self.X_test = 0
+     self.y_train = 0
+     self.y_test= 0
+
+
+  def split_data(self):
+       self.X = self.data.drop(["Loan_Status","Loan_ID"],axis=1)
+       self.y = self.data["Loan_Status"]
+       self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.3, random_state=42)
+
+  def pipeline_imblearn(self,sample_type,sampler,model):
+       # define pipeline
+       steps = [(sample_type, sampler), ('model', model)]
+       pipeline = Pipeline(steps=steps)
+       # evaluate pipeline
+       cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+       scores = cross_val_score(pipeline, self.X, self.y, scoring='f1_micro', cv=cv, n_jobs=-1)
+       score = np.mean(scores)
+       write_results_to_file('F1 Score: %.3f' % score)
+
+       print('F1 Score: %.3f' % score)
+
+
+  def random_sampling(self,name,sampler_model):
+
+       print_line(name.upper() + " SAMPLING")
+       print_line(f"LOGISTIC REGRESSION WITH {name.upper()} SAMPLING")
+       self.pipeline_imblearn( name,sampler_model,LOGC)
+       print_line(f"DECISION TREE WITH {name.upper()} SAMPLING")
+       self.pipeline_imblearn( name,sampler_model,DTC)
+
+       print_line(f"SVM WITH {name.upper()} SAMPLING")
+       self.pipeline_imblearn( name, sampler_model ,SVM)
+
+  def random_undersampling_approved(self):
+      self.random_sampling('under',RandomUnderSampler(sampling_strategy='majority'))
+
+  def random_oversampling_rejected(self):
+
+      self.random_sampling('over', RandomOverSampler(sampling_strategy='minority'))
+
+
+```
+
+From the resampling class, the first two functions are similar to those in the Classification class thus I will not go over them.
+```py
+  def pipeline_imblearn(self,sample_type,sampler,model):
+       # define pipeline
+       steps = [(sample_type, sampler), ('model', model)]
+       pipeline = Pipeline(steps=steps)
+       # evaluate pipeline
+       cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+       scores = cross_val_score(pipeline, self.X, self.y, scoring='f1_micro', cv=cv, n_jobs=-1)
+       score = np.mean(scores)
+       write_results_to_file('F1 Score: %.3f' % score)
+       print('F1 Score: %.3f' % score)
+
+```
+ The pipeline_imblearn function takes in three arguments :
+
+1. sample_type - this will either be over or under
+2. sampler - either the oversampler or undersampler from imblearn
+3. model - the model being run for that iteration. Between LGC, SVM and DTC
+
+The pipeline return an fscore of the model
+
+```py
+  def random_sampling(self,name,sampler_model):
+
+       print_line(name.upper() + " SAMPLING")
+       print_line(f"LOGISTIC REGRESSION WITH {name.upper()} SAMPLING")
+       self.pipeline_imblearn( name,sampler_model,LOGC)
+       print_line(f"DECISION TREE WITH {name.upper()} SAMPLING")
+       self.pipeline_imblearn( name,sampler_model,DTC)
+       print_line(f"SVM WITH {name.upper()} SAMPLING")
+       self.pipeline_imblearn( name, sampler_model ,SVM)
+
+```
+
+The random_sampling function takes in 2 arguments:
+
+1. name - The name of the sampling technique being used either over or under. This is also passed on to the pipeline function.
+
+2. sampler_model - either undersampler or oversampler from imblearn
+
+```py
+
+  def random_undersampling_approved(self):
+      self.random_sampling('under',RandomUnderSampler(sampling_strategy='majority'))
+
+  def random_oversampling_rejected(self):
+
+      self.random_sampling('over', RandomOverSampler(sampling_strategy='minority'))
+
+```
+
+Lastly, we make two functions to call the samplers with the above two functions.
+
+```py
+def _ResamplingTechniques(data):
+    z = ResamplingTechniques(data)
+    z.split_data()
+    z.random_oversampling_rejected()
+    z.random_undersampling_approved()
+```
+The _ResamplingTechniques function initialises the ResamplingTechniques class and calls all the function in the class on our dataframe.
+
+Run the function with :
+
+```py
+_ResamplingTechniques(data)
+```
+
+This yields the following fscores from our models
+
+
+<img src="../assets/shylock/resamplingScores.png" alt="Resampling scores"/>
+
+Performing the resampling has greatly improved our model. Can we do more? How about feature importance? Should gender hold more importance than marital status?
 
